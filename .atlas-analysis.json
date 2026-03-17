@@ -1,0 +1,56 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "foreman-builder",
+  "projectDescription": "A macOS CLI tool that creates and manages OrbStack-based container environments for Foreman development, providing a local-feeling dev experience.",
+  "theme": "aspen",
+  "primaryColor": "#73dff6",
+  "lightColor": "#37454c",
+  "darkColor": "#cfbdb2",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart"]
+          },
+          {
+            "group": "Installation",
+            "pages": ["installation/requirements", "installation/install"]
+          },
+          {
+            "group": "Command Reference",
+            "pages": [
+              "commands/create",
+              "commands/list",
+              "commands/delete"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": ["configuration/config-file", "configuration/container-template"]
+          },
+          {
+            "group": "Guides",
+            "pages": ["guides/first-container", "guides/ssh-access", "guides/troubleshooting"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Create OrbStack-based Rocky Linux 9 containers for Foreman development",
+    "Automated Katello/Foreman installation via Ansible playbooks",
+    "Tracks and manages containers created by foreman-builder",
+    "Configurable package installation via config.yml",
+    "Apple Silicon (arm64) support",
+    "SSH access with localhost port forwarding via OrbStack"
+  ],
+  "publicApiSurface": [
+    "foreman-builder create",
+    "foreman-builder list",
+    "foreman-builder delete <container-name>",
+    "config.yml (packages configuration)"
+  ]
+}
