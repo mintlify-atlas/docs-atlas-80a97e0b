@@ -63,14 +63,12 @@ Before creating the container, foreman-builder writes the rendered cloud-init co
 
 where `<username>` is your macOS username. You can inspect this file to see the exact commands and configuration that will be applied to your container.
 
-<Tree>
-  <Tree.Folder name="~/.foreman-builder" defaultOpen>
-    <Tree.File name="containers" />
-    <Tree.Folder name="confs" defaultOpen>
-      <Tree.File name="orbstack-foreman-alice.yml" />
-    </Tree.Folder>
-  </Tree.Folder>
-</Tree>
+```
+~/.foreman-builder/
+├── containers
+└── confs/
+    └── orbstack-foreman-alice.yml
+```
 
 The `containers` file is a plain text file with one container name per line, tracking which containers were created by foreman-builder.
 

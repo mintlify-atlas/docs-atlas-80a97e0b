@@ -50,7 +50,7 @@ description: "Get your first Foreman development container running on OrbStack i
     foreman-builder create
     ```
 
-    If you do not pass a `--name` flag, the container is named `foreman` by default.
+    You will be prompted to enter a container name. Press **Enter** to accept the default name `foreman`, or type a custom name.
 
     foreman-builder reads an optional `./config.yml` file from your current directory if it exists. You can use this to specify additional packages to install inside the container. If no config file is present, the default setup runs without modification.
   </Step>
@@ -103,12 +103,12 @@ description: "Get your first Foreman development container running on OrbStack i
 
 ## Next steps
 
-<Columns cols={2}>
+<CardGroup cols={2}>
   <Card title="Installation" icon="download" href="/installation/requirements">
     Detailed requirements and alternative installation notes.
   </Card>
   <Card title="create command" icon="terminal" href="/commands/create">
-    Full reference for the create command and its flags.
+    Full reference for the create command.
   </Card>
   <Card title="SSH access guide" icon="key" href="/guides/ssh-access">
     Tips for working inside your Foreman container over SSH.
@@ -116,4 +116,4 @@ description: "Get your first Foreman development container running on OrbStack i
   <Card title="Configuration" icon="gear" href="/configuration/config-file">
     Customize which packages are installed during container setup.
   </Card>
-</Columns>
+</CardGroup>

@@ -32,30 +32,34 @@ foreman-builder --help
 You should see output listing the available commands and global flags:
 
 ```
+A CLI tool to create and manage foreman containers.
+
 Usage:
   foreman-builder [command]
 
 Available Commands:
-  create      Create a new Foreman development container
-  delete      Delete a Foreman development container
-  list        List all foreman-builder managed containers
+  completion  Generate the autocompletion script for the specified shell
+  create      Create a new container environment
+  delete      Delete container via name.
+  help        Help about any command
+  list        List all containers created with foreman-builder.
 
 Flags:
   -h, --help   help for foreman-builder
+
+Use "foreman-builder [command] --help" for more information about a command.
 ```
 
 ## What gets created on first run
 
 The first time you run a foreman-builder command, it creates a configuration directory in your home folder:
 
-<Tree>
-  <Tree.Folder name="~/.foreman-builder" defaultOpen>
-    <Tree.File name="containers" />
-    <Tree.Folder name="confs" defaultOpen>
-      <Tree.File name="<container-name>.yml" />
-    </Tree.Folder>
-  </Tree.Folder>
-</Tree>
+```
+~/.foreman-builder/
+├── containers
+└── confs/
+    └── orbstack-foreman-<username>.yml
+```
 
 | Path | Purpose |
 |---|---|
@@ -74,11 +78,11 @@ go install github.com/aidenfine/foreman-builder@latest
 
 ## Next steps
 
-<Columns cols={2}>
+<CardGroup cols={2}>
   <Card title="Quickstart" icon="rocket" href="/quickstart">
     Create your first Foreman container.
   </Card>
   <Card title="create command" icon="terminal" href="/commands/create">
-    Full reference for the create command and its options.
+    Full reference for the create command.
   </Card>
-</Columns>
+</CardGroup>
