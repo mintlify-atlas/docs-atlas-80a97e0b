@@ -1,0 +1,144 @@
+---
+title: "Troubleshooting"
+description: "Solutions to common issues when creating and using Foreman development containers."
+---
+
+<AccordionGroup>
+  <Accordion title='Error: "Orbstack must be running"'>
+    This error appears when OrbStack is installed but not currently running.
+
+    **Fix:** Open the OrbStack application from your Applications folder or menu bar. Wait for it to finish starting up, then retry your command.
+
+    To check OrbStack's status from the terminal:
+
+    ```bash
+    orbctl status
+    ```
+  </Accordion>
+
+  <Accordion title='Error: "does not currently support non apple-silicon devices"'>
+    foreman-builder only supports Apple Silicon (arm64) Macs. Intel-based Macs are not supported.
+
+    This is a hard limitation — the cloud-init template and the OrbStack configuration are built for `aarch64`. There is no workaround for Intel Macs.
+  </Accordion>
+
+  <Accordion title="Container creation fails or hangs">
+    If `foreman-builder create` fails or the container appears stuck during setup, the most useful diagnostic is the cloud-init log:
+
+    ```bash
+    ssh <container-name>@orb cat /var/log/cloud-init-output.log
+    ```
+
+    Replace `<container-name>` with your container name (default: `foreman`).
+
+    To follow it live:
+
+    ```bash
+    ssh foreman@orb tail -f /var/log/cloud-init-output.log
+    ```
+
+    Look for error lines or the last successful step to identify where setup stopped.
+
+    You can also check the cloud-init status:
+
+    ```bash
+    ssh foreman@orb cloud-init status
+    ```
+
+    If the status is `error`, the log will contain the details.
+  </Accordion>
+
+  <Accordion title="Setup is taking a very long time">
+    This is expected. The Ansible playbook (`katello_devel.yml`) installs and configures a full Foreman + Katello development stack. Depending on your internet speed and machine, **setup can take 15–30 minutes or more**.
+
+    Monitor progress with:
+
+    ```bash
+    ssh foreman@orb tail -f /var/log/cloud-init-output.log
+    ```
+
+    The playbook produces a lot of output. Look for `PLAY RECAP` near the end — that indicates the Ansible run has finished.
+  </Accordion>
+
+  <Accordion title="ruby or node command not found after SSH">
+    Ruby is installed via rbenv, which requires shell initialization. If `ruby` or `node` are not found:
+
+    1. Source your bashrc:
+
+    ```bash
+    source ~/.bashrc
+    ```
+
+    2. Verify rbenv is in your PATH:
+
+    ```bash
+    echo $PATH | tr ':' '\n' | grep rbenv
+    ```
+
+    3. Check that `~/.bashrc.d/custom.sh` exists and contains the rbenv initialization:
+
+    ```bash
+    cat ~/.bashrc.d/custom.sh
+    ```
+
+    If the file is missing, cloud-init may not have finished. Check `cloud-init status` and the output log.
+  </Accordion>
+
+  <Accordion title="Can't delete a container with foreman-builder delete">
+    foreman-builder only allows you to delete containers that it created and is tracking. If a container is not listed in `foreman-builder list`, you cannot delete it with foreman-builder.
+
+    This is intentional — it prevents accidental deletion of containers created outside of foreman-builder.
+
+    To delete an untracked container, use OrbStack directly:
+
+    ```bash
+    orbctl delete <container-name>
+    ```
+
+    Or delete it from the OrbStack UI.
+  </Accordion>
+
+  <Accordion title="Checking and listing OrbStack containers">
+    To see all containers in OrbStack (not just foreman-builder ones):
+
+    ```bash
+    orbctl list
+    ```
+
+    To check OrbStack's overall status:
+
+    ```bash
+    orbctl status
+    ```
+
+    To see only the containers foreman-builder is tracking:
+
+    ```bash
+    foreman-builder list
+    ```
+  </Accordion>
+
+  <Accordion title="Can't access Foreman UI at localhost:3000">
+    Port forwarding from the container to localhost is handled automatically by OrbStack, but the Foreman Rails server must be started manually inside the container.
+
+    1. SSH into the container:
+
+    ```bash
+    ssh foreman@orb
+    ```
+
+    2. Navigate to the Foreman source directory:
+
+    ```bash
+    cd ~/foreman
+    ```
+
+    3. Start the Rails server (refer to the Foreman development documentation for the exact command, as it may vary by version).
+
+    If OrbStack is running but you still cannot reach `localhost:3000`, verify the server is actually listening:
+
+    ```bash
+    ssh foreman@orb ss -tlnp | grep 3000
+    ```
+  </Accordion>
+</AccordionGroup>

@@ -1,0 +1,120 @@
+---
+title: "SSH access"
+description: "Connect to your Foreman container and work inside it using OrbStack's SSH integration."
+---
+
+OrbStack provides built-in SSH access to all containers using the `@orb` hostname suffix. No SSH key setup or IP address management is required.
+
+## Connecting to the container
+
+The default container name is `foreman`. Connect with:
+
+```bash
+ssh foreman@orb
+```
+
+If you have multiple containers or named yours differently, substitute the container name:
+
+```bash
+ssh <container-name>@orb
+```
+
+To see your container names, run:
+
+```bash
+foreman-builder list
+```
+
+<Note>
+  OrbStack must be running for SSH to work. If the connection is refused, open the OrbStack app first.
+</Note>
+
+## Running commands without a full session
+
+You can run a single command in the container without opening an interactive shell:
+
+```bash
+ssh foreman@orb <command>
+```
+
+For example, to check cloud-init status:
+
+```bash
+ssh foreman@orb cloud-init status
+```
+
+Or to follow the setup log:
+
+```bash
+ssh foreman@orb tail -f /var/log/cloud-init-output.log
+```
+
+## Port forwarding
+
+OrbStack automatically forwards all ports opened inside your container to `localhost` on your Mac. No manual port mapping is required.
+
+| Port | Service |
+|------|---------|
+| `3000` | Foreman Rails development server |
+| `80` | Foreman via Apache (after installer runs) |
+| `5432` | PostgreSQL |
+
+Access any of these directly in your browser or tools:
+
+```
+http://localhost:3000
+```
+
+## Working in the container
+
+### Foreman source
+
+The Foreman source code is at:
+
+```
+~/foreman/
+```
+
+This is where you'll start the Rails server, run tests, and make code changes.
+
+### Shell environment
+
+The setup writes a `~/.bashrc.d/custom.sh` file that is sourced when you log in. It configures:
+
+- **rbenv**: `~/.rbenv/bin` is added to `PATH` and `rbenv init` is run automatically
+- **`ll` alias**: `ll` runs `ls -la`
+
+If rbenv or Ruby is not found after SSH-ing in, ensure your shell sources `~/.bashrc`:
+
+```bash
+source ~/.bashrc
+```
+
+### rbenv
+
+Ruby is managed with rbenv. The global Ruby version is set to 3.1.6. Common rbenv commands:
+
+```bash
+# Check current Ruby version
+ruby --version
+
+# List installed Ruby versions
+rbenv versions
+
+# Check which rbenv ruby is active
+rbenv which ruby
+```
+
+## Copying files into the container
+
+Use `scp` with the `@orb` syntax:
+
+```bash
+scp ./myfile.rb foreman@orb:~/foreman/
+```
+
+Or use `rsync`:
+
+```bash
+rsync -av ./local-dir/ foreman@orb:~/foreman/
+```

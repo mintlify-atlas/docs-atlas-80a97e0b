@@ -1,0 +1,73 @@
+---
+title: "config.yml"
+description: "Configure additional packages to install in your Foreman development container."
+---
+
+Foreman-builder reads an optional `config.yml` file from your current working directory when you run `foreman-builder create`. Use it to install additional dnf packages into your container on top of the default set.
+
+## File location
+
+The file must be named `config.yml` and placed in the **current working directory** from which you run `foreman-builder create`.
+
+```
+./config.yml   ← must be here when running foreman-builder create
+```
+
+<Note>
+  If no `config.yml` exists, container creation proceeds normally with the default package set. You do not need to create this file unless you want extra packages installed.
+</Note>
+
+## Structure
+
+```yaml config.yml
+packages:
+  - package-name-1
+  - package-name-2
+```
+
+The file has a single top-level key:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `packages` | list of strings | dnf package names to install during container initialization |
+
+Each entry in `packages` must be a valid package name available in the repositories configured in the container (EPEL, CRB, and the default Rocky Linux 9 repos).
+
+## Example
+
+This example installs common tools useful for Foreman development:
+
+```yaml config.yml
+packages:
+  - vim
+  - tmux
+  - jq
+  - postgresql
+  - redis
+  - the_silver_searcher
+```
+
+These packages are passed to a `dnf install -y` command during cloud-init initialization, after the EPEL and CRB repositories are enabled.
+
+## Default packages
+
+Regardless of what you put in `config.yml`, the following packages are always installed as part of the base setup:
+
+- `epel-release`
+- `git`, `zsh`, `curl`, `wget`, `htop`
+- `gcc`, `gcc-c++`, `make`, `perl`
+- `openssl-devel`, `libffi-devel`, `readline-devel`, `zlib-devel`, `bzip2`
+- `autoconf`, `automake`, `libtool`, `patch`
+- `ansible-core`
+- `libyaml-devel` (from CRB)
+- `nodejs` (Node.js 22 via dnf module)
+
+Ruby 3.1.6 is installed separately via rbenv and is not a dnf package.
+
+## What happens with the packages
+
+When packages are provided, foreman-builder includes them in the generated cloud-init config as an additional `dnf install` command that runs during container initialization. The packages are installed after the base dependencies and before the Ansible playbook runs.
+
+<Tip>
+  Stick to packages available in the default Rocky Linux 9, EPEL, or CRB repositories. If a package name is wrong or unavailable, cloud-init will log an error but the rest of the setup will continue.
+</Tip>

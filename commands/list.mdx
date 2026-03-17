@@ -1,0 +1,33 @@
+---
+title: "list"
+description: "List all containers created and tracked by foreman-builder."
+---
+
+## Usage
+
+```bash
+foreman-builder list
+```
+
+## What it shows
+
+`foreman-builder list` prints the names of containers that were created using `foreman-builder create`. It reads from `~/.foreman-builder/containers` and prefixes each entry with `- `.
+
+<Note>
+  Only containers tracked by foreman-builder are shown. Containers you created directly with `orb create` or OrbStack will not appear in this list.
+</Note>
+
+## Example output
+
+```
+- foreman
+- my-foreman
+- foreman-nightly
+```
+
+If no containers have been created yet, the command produces no output.
+
+## Related commands
+
+- [`foreman-builder create`](/commands/create) — create a new container
+- [`foreman-builder delete`](/commands/delete) — delete a tracked container

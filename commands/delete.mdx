@@ -1,0 +1,73 @@
+---
+title: "delete"
+description: "Delete a container that was created with foreman-builder."
+---
+
+## Usage
+
+```bash
+foreman-builder delete <container-name>
+```
+
+## Arguments
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `container-name` | Yes | The name of the container to delete. Exactly one name is required. |
+
+## What it does
+
+<Steps>
+  <Step title="Verify the container is tracked">
+    Checks `~/.foreman-builder/containers` to confirm the container was created by foreman-builder. If the name is not found, the command exits with an error.
+  </Step>
+  <Step title="Check container state">
+    Calls `orbctl info <name> --format json` to determine whether the container is currently running or stopped.
+  </Step>
+  <Step title="Prompt if running">
+    If the container is running, you are asked to confirm before proceeding:
+
+    ```
+    Container is currently running! Do you want to stop and delete? [y/n]
+    ```
+
+    Enter `y` to stop and delete the container, or `n` to cancel.
+  </Step>
+  <Step title="Delete the container">
+    Calls `orbctl delete <name> -f` to remove the container from OrbStack.
+  </Step>
+  <Step title="Remove from tracking">
+    Removes the container name from `~/.foreman-builder/containers` so it no longer appears in `foreman-builder list`.
+  </Step>
+</Steps>
+
+<Warning>
+  Deleting a container is **permanent**. All data inside the container, including any local changes to the Foreman source tree, will be lost.
+</Warning>
+
+## Example
+
+Deleting a stopped container:
+
+```bash
+$ foreman-builder delete foreman
+```
+
+Deleting a running container:
+
+```bash
+$ foreman-builder delete my-foreman
+Container is currently running! Do you want to stop and delete? [y/n] y
+```
+
+Attempting to delete a container not tracked by foreman-builder:
+
+```bash
+$ foreman-builder delete some-other-container
+# exits with error — container not tracked by foreman-builder
+```
+
+## Related commands
+
+- [`foreman-builder create`](/commands/create) — create a new container
+- [`foreman-builder list`](/commands/list) — list tracked containers

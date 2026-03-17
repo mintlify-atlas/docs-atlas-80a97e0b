@@ -1,0 +1,114 @@
+---
+title: "create"
+description: "Create a new Rocky Linux 9 container pre-configured for Foreman development."
+---
+
+## Usage
+
+```bash
+foreman-builder create
+```
+
+The command is interactive. It prompts you for a container name, then provisions the container and runs the full Katello development playbook inside it.
+
+<Warning>
+  This command takes **15–30+ minutes** to complete. The bulk of the time is spent running the Ansible `katello_devel.yml` playbook, which installs and configures the full Foreman/Katello stack.
+</Warning>
+
+## Interactive prompt
+
+When you run `foreman-builder create`, you are prompted for a container name:
+
+```
+Container name (default foreman):
+```
+
+Press **Enter** to accept the default name `foreman`, or type a custom name. The name must be unique within OrbStack.
+
+## What it does
+
+<Steps>
+  <Step title="Collect container name">
+    Reads the container name from stdin. Defaults to `foreman` if left blank.
+  </Step>
+  <Step title="Read config.yml">
+    Reads `./config.yml` from the current directory if it exists. The `Packages` field is used to install additional packages during setup. See [Configuration](/configuration/config-file) for details.
+  </Step>
+  <Step title="Generate cloud-init config">
+    Writes a cloud-init YAML file to `~/.foreman-builder/confs/orbstack-foreman-<username>.yml`, using your macOS username and the package list from `config.yml`.
+  </Step>
+  <Step title="Create the container">
+    Runs the following command to create the container:
+
+    ```bash
+    orb create -a amd64 -c ~/.foreman-builder/confs/orbstack-foreman-<username>.yml rocky:9 <container-name>
+    ```
+  </Step>
+  <Step title="Record the container">
+    Appends the container name to `~/.foreman-builder/containers` so it appears in `foreman-builder list` and can be managed with `foreman-builder delete`.
+  </Step>
+</Steps>
+
+<Note>
+  foreman-builder always creates containers with **amd64 architecture**, even on Apple Silicon Macs. This is intentional — it ensures compatibility with packages and dependencies that do not have arm64 builds.
+</Note>
+
+## What gets installed
+
+Cloud-init bootstraps the container with the following:
+
+**System packages**
+
+- `epel-release`, `git`, `zsh`, `curl`, `wget`, `htop`
+- `gcc`, `gcc-c++`, `make`, `perl`
+- `openssl-devel`, `libffi-devel`, `readline-devel`, `zlib-devel`, `libyaml-devel` (from CRB repo)
+- `bzip2`, `autoconf`, `automake`, `libtool`, `patch`
+- `ansible-core`
+
+**Runtimes**
+
+- **Node.js 22** — installed via the `dnf` module
+- **Ruby 3.1.6** — installed via `rbenv`
+
+**Foreman stack**
+
+- Clones [theforeman/forklift](https://github.com/theforeman/forklift)
+- Runs `ansible-playbook katello_devel.yml` with staging/nightly repositories
+- Creates `~/foreman/.env`
+
+**User configuration**
+
+- Creates a user matching your macOS username
+- Adds the user to the `wheel` group with passwordless sudo
+- Sets the container hostname to `foreman-dev.example.com`
+
+## Monitoring progress
+
+Cloud-init runs in the background after the container is created. You can tail its output log to follow progress:
+
+```bash
+ssh <container-name>@orb cat /var/log/cloud-init-output.log
+```
+
+To stream logs continuously:
+
+```bash
+ssh foreman@orb tail -f /var/log/cloud-init-output.log
+```
+
+<Tip>
+  The playbook step takes the longest. Once you see output from `ansible-playbook`, you can estimate roughly 15–25 minutes remaining.
+</Tip>
+
+## Example
+
+```bash
+$ foreman-builder create
+Container name (default foreman): my-foreman
+```
+
+This creates a container named `my-foreman`. After creation, you can SSH into it:
+
+```bash
+ssh my-foreman@orb
+```

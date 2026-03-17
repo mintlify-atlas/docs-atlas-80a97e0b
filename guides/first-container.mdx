@@ -1,0 +1,138 @@
+---
+title: "Create your first container"
+description: "A step-by-step walkthrough of creating and verifying your first Foreman development container."
+---
+
+This guide walks you through creating a Foreman development container from scratch, verifying the setup, and accessing the Foreman UI.
+
+<Note>
+  Container initialization runs an Ansible playbook that installs Ruby, Node.js, and a full Katello/Foreman stack. **Expect this to take 15–30 minutes or more** depending on your network speed.
+</Note>
+
+## Prerequisites
+
+- foreman-builder is installed (`foreman-builder --help` works)
+- OrbStack is installed and running
+- You are on an Apple Silicon Mac
+
+## Steps
+
+<Steps>
+  <Step title="Create a config.yml (optional)">
+    If you want to install extra packages into your container, create a `config.yml` in the directory where you'll run `foreman-builder create`.
+
+    ```yaml config.yml
+    packages:
+      - vim
+      - tmux
+      - jq
+      - the_silver_searcher
+    ```
+
+    Skip this step if you don't need any packages beyond the defaults. foreman-builder will proceed without a `config.yml`.
+  </Step>
+
+  <Step title="Run foreman-builder create">
+    From the directory containing your `config.yml` (or any directory if you skipped the previous step), run:
+
+    ```bash
+    foreman-builder create
+    ```
+
+    foreman-builder will:
+    1. Read your `config.yml` if present
+    2. Generate a cloud-init configuration at `~/.foreman-builder/confs/orbstack-foreman-<username>.yml`
+    3. Create a Rocky Linux 9 container in OrbStack
+    4. Hand off to cloud-init to bootstrap the environment
+
+    The command returns once the container is created in OrbStack. The actual setup (installing packages, running Ansible) continues in the background inside the container.
+  </Step>
+
+  <Step title="Monitor setup progress">
+    Cloud-init logs all output to `/var/log/cloud-init-output.log` inside the container. Follow it to track progress:
+
+    ```bash
+    ssh foreman@orb tail -f /var/log/cloud-init-output.log
+    ```
+
+    You'll see dnf installs, rbenv setup, and eventually the Ansible playbook output. The playbook produces a lot of output — this is normal.
+
+    <Tip>
+      The Ansible playbook step takes the longest. Look for lines like `PLAY RECAP` to know when it's finished.
+    </Tip>
+
+    To check if cloud-init has finished:
+
+    ```bash
+    ssh foreman@orb cloud-init status
+    ```
+
+    A status of `done` means setup is complete. A status of `running` means it's still in progress.
+  </Step>
+
+  <Step title="SSH into the container">
+    Once setup is complete, connect to the container:
+
+    ```bash
+    ssh foreman@orb
+    ```
+
+    You'll be logged in as your macOS user inside the Rocky Linux 9 container.
+  </Step>
+
+  <Step title="Verify Ruby and Node.js">
+    Check that Ruby and Node.js were installed correctly:
+
+    ```bash
+    ruby --version
+    ```
+
+    Expected output:
+
+    ```
+    ruby 3.1.6p260 (2024-05-29 revision a777087be6) [aarch64-linux]
+    ```
+
+    ```bash
+    node --version
+    ```
+
+    Expected output:
+
+    ```
+    v22.x.x
+    ```
+
+    If `ruby` is not found, rbenv may not be initialized. Try running `source ~/.bashrc` or start a new shell session.
+  </Step>
+
+  <Step title="Access the Foreman UI">
+    OrbStack automatically forwards ports from your container to localhost on your Mac. Open your browser and navigate to:
+
+    ```
+    http://localhost:3000
+    ```
+
+    <Note>
+      The Foreman Rails server must be started manually inside the container before the UI is accessible. Navigate to `~/foreman` and follow the Foreman development docs to start the server.
+    </Note>
+
+    **Default credentials:**
+
+    | Field | Value |
+    |-------|-------|
+    | Username | `admin` |
+    | Password | `changeme` |
+  </Step>
+</Steps>
+
+## What's next
+
+<CardGroup cols={2}>
+  <Card title="SSH access" icon="terminal" href="/guides/ssh-access">
+    Learn how SSH and port forwarding work with OrbStack containers.
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/guides/troubleshooting">
+    Common issues and how to resolve them.
+  </Card>
+</CardGroup>

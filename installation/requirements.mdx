@@ -1,0 +1,77 @@
+---
+title: "Requirements"
+description: "System and software requirements for running foreman-builder."
+---
+
+foreman-builder has a small set of hard requirements. Several of these are enforced at runtime — the tool will refuse to start if they are not met.
+
+## Apple Silicon Mac
+
+foreman-builder only runs on macOS with Apple Silicon (arm64). Intel-based Macs are not supported. This restriction is enforced in code at startup.
+
+<Warning>
+  Attempting to run foreman-builder on an Intel Mac will exit immediately with an error. There is no workaround or compatibility layer.
+</Warning>
+
+**Supported:** M1, M1 Pro, M1 Max, M1 Ultra, M2, M2 Pro, M2 Max, M2 Ultra, M3, and later Apple Silicon chips.
+
+## OrbStack
+
+[OrbStack](https://orbstack.dev/) must be installed and **running** before you use any foreman-builder command.
+
+foreman-builder delegates container creation and management to OrbStack's `orbctl` CLI. The `orbctl` binary must be present in your `PATH`.
+
+**To verify OrbStack is installed and available:**
+
+```bash
+which orbctl
+```
+
+**To verify OrbStack is running:**
+
+```bash
+orbctl status
+```
+
+<Note>
+  OrbStack is a macOS application. Start it from your Applications folder or menu bar before running foreman-builder commands.
+</Note>
+
+## Go
+
+Go is required to install foreman-builder via `go install`. Once the binary is installed, Go does not need to remain installed to run foreman-builder.
+
+**Minimum version:** Go 1.21 or later is recommended.
+
+**Install Go:** [go.dev/doc/install](https://go.dev/doc/install)
+
+**Verify your Go installation:**
+
+```bash
+go version
+```
+
+## Network access
+
+Container setup requires an active internet connection. During cloud-init, the following resources are downloaded:
+
+| Resource | Details |
+|---|---|
+| Ruby 3.1.6 | Downloaded and compiled via rbenv |
+| Node.js 22 | Installed from the NodeSource repository |
+| Ansible | Installed via pip or the system package manager |
+| forklift | Cloned from GitHub |
+| Katello/Foreman packages | Pulled during the `katello_devel.yml` playbook run |
+
+<Tip>
+  A fast, stable connection significantly reduces container setup time. Expect 20–40 minutes on a typical connection.
+</Tip>
+
+## Summary
+
+| Requirement | Details |
+|---|---|
+| macOS architecture | Apple Silicon (arm64) only |
+| OrbStack | Installed, running, and `orbctl` in `PATH` |
+| Go | Required for installation only |
+| Network | Required during container setup |

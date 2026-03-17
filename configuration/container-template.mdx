@@ -1,0 +1,90 @@
+---
+title: "Container template"
+description: "How foreman-builder configures your OrbStack container using a cloud-init template."
+---
+
+Foreman-builder uses [cloud-init](https://cloud-init.io/) to automatically configure your container when it first boots. Cloud-init is a widely used standard for bootstrapping Linux instances — it runs a set of commands and writes files during the first boot of a new machine or container.
+
+## What gets configured automatically
+
+You do not need to configure any of this yourself. When you run `foreman-builder create`, the tool generates a cloud-init config and passes it to OrbStack. The following is set up on first boot:
+
+**User and permissions**
+- A user matching your macOS username is created
+- The user is added to the `wheel` group
+- Passwordless sudo is configured for the user
+- Home directory ownership is set correctly
+
+**Hostname and networking**
+- Hostname is set to `foreman-dev.example.com`
+- `/etc/hosts` is configured with entries for both the hostname and localhost
+
+**Package installation**
+- EPEL and CRB repositories are enabled
+- A base set of development packages is installed via dnf
+- Any packages from your `config.yml` are also installed
+- Node.js 22 is installed via the dnf nodejs:22 module
+
+**Ruby via rbenv**
+- rbenv is cloned into the user's home directory
+- Ruby 3.1.6 is installed and set as the global version
+- rbenv is initialized in `~/.bashrc` and `~/.bashrc.d/custom.sh`
+
+**Foreman / Katello stack**
+- [forklift](https://github.com/theforeman/forklift) is cloned
+- The `katello_devel.yml` Ansible playbook is run against localhost
+- The playbook installs and configures a full Foreman + Katello development environment
+- The foreman-installer scenario is fixed to use the correct home directory path and re-run
+- An empty `~/.env` file is created in the foreman source directory
+
+**Shell environment**
+- `~/.bashrc.d/custom.sh` is written with PATH and rbenv initialization
+- An `ll` alias for `ls -la` is set up
+
+## Default credentials
+
+| Setting | Value |
+|---------|-------|
+| Foreman admin username | `admin` |
+| Foreman admin password | `changeme` |
+| Hostname | `foreman-dev.example.com` |
+
+<Warning>
+  The admin password `changeme` is set by the Ansible playbook. This is a development environment only — do not expose it to the public internet.
+</Warning>
+
+## Generated config file
+
+Before creating the container, foreman-builder writes the rendered cloud-init configuration to:
+
+```
+~/.foreman-builder/confs/orbstack-foreman-<username>.yml
+```
+
+where `<username>` is your macOS username. You can inspect this file to see the exact commands and configuration that will be applied to your container.
+
+<Tree>
+  <Tree.Folder name="~/.foreman-builder" defaultOpen>
+    <Tree.File name="containers" />
+    <Tree.Folder name="confs" defaultOpen>
+      <Tree.File name="orbstack-foreman-alice.yml" />
+    </Tree.Folder>
+  </Tree.Folder>
+</Tree>
+
+The `containers` file is a plain text file with one container name per line, tracking which containers were created by foreman-builder.
+
+## Template variables
+
+The cloud-init config is generated from an embedded Go template. The following variables are substituted at generation time:
+
+| Variable | Value |
+|----------|-------|
+| `{{ .Username }}` | Your macOS username (from the system) |
+| `{{ .InstallString }}` | Space-joined list of packages from `config.yml` (only present if packages are provided) |
+
+## Current limitations
+
+<Note>
+  The cloud-init template is embedded in the foreman-builder binary. It is not currently user-configurable. If you need to customize the template beyond what `config.yml` supports, you would need to build foreman-builder from source with a modified template.
+</Note>

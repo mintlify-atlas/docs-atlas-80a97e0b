@@ -1,0 +1,63 @@
+---
+title: "Introduction"
+description: "A macOS CLI tool that creates and manages OrbStack-based container environments for Foreman development."
+---
+
+## What is foreman-builder?
+
+`foreman-builder` is a command-line tool for macOS that automates the creation of containerized [Foreman](https://theforeman.org/) development environments. It uses [OrbStack](https://orbstack.dev/) to run Rocky Linux 9 containers that feel as close to a local environment as possible — with localhost port forwarding, SSH access, and a fully configured Katello/Foreman stack.
+
+<Note>
+  foreman-builder currently only supports **Apple Silicon (arm64)** Macs. Intel-based Macs are not supported.
+</Note>
+
+## Why foreman-builder?
+
+Setting up a Foreman development environment from scratch involves installing Ruby, Node.js, Ansible, configuring repositories, running playbooks, and wiring everything together. `foreman-builder` automates all of this so you can focus on development rather than setup.
+
+<CardGroup cols={2}>
+  <Card title="Automated setup" icon="robot">
+    Runs Ansible's `katello_devel.yml` playbook automatically, installing Ruby via rbenv, Node.js 22, and a full Katello/Foreman stack.
+  </Card>
+  <Card title="OrbStack integration" icon="box">
+    Containers run on OrbStack, giving you fast VM-like Linux containers with native SSH access and transparent localhost port forwarding.
+  </Card>
+  <Card title="Container lifecycle management" icon="layer-group">
+    Create, list, and delete Foreman containers — all tracked by foreman-builder so you only manage what you own.
+  </Card>
+  <Card title="Configurable packages" icon="package">
+    Provide a `config.yml` to install additional packages into your container during setup.
+  </Card>
+</CardGroup>
+
+## How it works
+
+1. You run `foreman-builder create` in your terminal.
+2. foreman-builder reads your optional `config.yml` for any extra packages to install.
+3. It generates a cloud-init configuration using your username and package list.
+4. It calls `orb create` to spin up a Rocky Linux 9 container on OrbStack.
+5. Cloud-init bootstraps the container: installs dependencies, sets up Ruby/rbenv, clones [forklift](https://github.com/theforeman/forklift), and runs the Katello development playbook.
+6. Once complete, you can SSH into the container and start developing.
+
+## Requirements
+
+- macOS with Apple Silicon (arm64)
+- [Go](https://go.dev/doc/install) (for installation via `go install`)
+- [OrbStack](https://orbstack.dev/) installed and running
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get your first Foreman container running in minutes.
+  </Card>
+  <Card title="Installation" icon="download" href="/installation/requirements">
+    Detailed requirements and installation steps.
+  </Card>
+  <Card title="Command reference" icon="terminal" href="/commands/create">
+    Full documentation for all foreman-builder commands.
+  </Card>
+  <Card title="Configuration" icon="gear" href="/configuration/config-file">
+    Learn how to customize your container setup.
+  </Card>
+</CardGroup>

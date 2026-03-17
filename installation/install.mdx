@@ -1,0 +1,84 @@
+---
+title: "Installation"
+description: "Install foreman-builder using go install and verify your setup."
+---
+
+## Install via go install
+
+The primary way to install foreman-builder is with `go install`. This compiles the binary from source and places it in your Go binary directory.
+
+```bash
+go install github.com/aidenfine/foreman-builder@latest
+```
+
+This installs the latest released version. The binary is placed at `$(go env GOPATH)/bin/foreman-builder`.
+
+<Note>
+  Make sure `$(go env GOPATH)/bin` is included in your `PATH`. You can add it to your shell profile if it is not already present:
+
+  ```bash
+  export PATH="$(go env GOPATH)/bin:$PATH"
+  ```
+</Note>
+
+## Verify the installation
+
+After installing, confirm the binary is accessible and working:
+
+```bash
+foreman-builder --help
+```
+
+You should see output listing the available commands and global flags:
+
+```
+Usage:
+  foreman-builder [command]
+
+Available Commands:
+  create      Create a new Foreman development container
+  delete      Delete a Foreman development container
+  list        List all foreman-builder managed containers
+
+Flags:
+  -h, --help   help for foreman-builder
+```
+
+## What gets created on first run
+
+The first time you run a foreman-builder command, it creates a configuration directory in your home folder:
+
+<Tree>
+  <Tree.Folder name="~/.foreman-builder" defaultOpen>
+    <Tree.File name="containers" />
+    <Tree.Folder name="confs" defaultOpen>
+      <Tree.File name="<container-name>.yml" />
+    </Tree.Folder>
+  </Tree.Folder>
+</Tree>
+
+| Path | Purpose |
+|---|---|
+| `~/.foreman-builder/containers` | Tracks the names of all containers managed by foreman-builder |
+| `~/.foreman-builder/confs/` | Stores the cloud-init configuration generated for each container |
+
+These files are managed automatically. You do not need to edit them directly.
+
+## Upgrading
+
+To upgrade to the latest version, re-run the same install command:
+
+```bash
+go install github.com/aidenfine/foreman-builder@latest
+```
+
+## Next steps
+
+<Columns cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Create your first Foreman container.
+  </Card>
+  <Card title="create command" icon="terminal" href="/commands/create">
+    Full reference for the create command and its options.
+  </Card>
+</Columns>
